@@ -85,11 +85,26 @@ export const CRITICAL_CASES = [
 ];
 
 export const CGM_PATIENTS = [
-  { id: 1, name: 'นันทชัย แก้วนิ่น', initial: 'น', color: '#818cf8', avg: 147, readings: 30960, status: 'normal' },
-  { id: 2, name: 'ปริญญา ลพสถิตย์', initial: 'ป', color: '#f59e0b', avg: 150, readings: 8470, status: 'warning' },
-  { id: 3, name: 'พชรพงศ์ ธีนวงค์', initial: 'พ', color: '#22c55e', avg: 129, readings: 6229, status: 'normal' },
-  { id: 4, name: 'ศรุดา เดชาภิกรณ์รู้', initial: 'ศ', color: '#f472b6', avg: 87, readings: 5586, status: 'normal' },
-  { id: 5, name: 'น.ส.อัจฉรา พรหมณ์เสนะ', initial: 'อ', color: '#818cf8', avg: 107, readings: 5532, status: 'normal' },
+  { id: 1, name: 'นันทชัย แก้วนิ่น', initial: 'น', color: '#818cf8', avg: 147, readings: 30960, status: 'warning', gmi: 6.8, cv: 32, tirInRange: 62, tirAbove: 28, tirBelow: 10, hypoEvents: 3, hyperEvents: 12 },
+  { id: 2, name: 'ปริญญา ลพสถิตย์', initial: 'ป', color: '#f59e0b', avg: 150, readings: 8470, status: 'warning', gmi: 6.9, cv: 38, tirInRange: 55, tirAbove: 35, tirBelow: 10, hypoEvents: 5, hyperEvents: 18 },
+  { id: 3, name: 'พชรพงศ์ ธีนวงค์', initial: 'พ', color: '#22c55e', avg: 129, readings: 6229, status: 'normal', gmi: 6.2, cv: 28, tirInRange: 78, tirAbove: 15, tirBelow: 7, hypoEvents: 2, hyperEvents: 5 },
+  { id: 4, name: 'ศรุดา เดชาภิกรณ์รู้', initial: 'ศ', color: '#f472b6', avg: 87, readings: 5586, status: 'normal', gmi: 5.4, cv: 22, tirInRange: 92, tirAbove: 3, tirBelow: 5, hypoEvents: 1, hyperEvents: 1 },
+  { id: 5, name: 'น.ส.อัจฉรา พรหมณ์เสนะ', initial: 'อ', color: '#818cf8', avg: 107, readings: 5532, status: 'normal', gmi: 5.8, cv: 25, tirInRange: 85, tirAbove: 8, tirBelow: 7, hypoEvents: 2, hyperEvents: 3 },
+];
+
+export const CGM_GLUCOSE_TREND = [
+  { time: '00:00', avg: 125, min: 95, max: 165 },
+  { time: '02:00', avg: 118, min: 88, max: 155 },
+  { time: '04:00', avg: 110, min: 82, max: 145 },
+  { time: '06:00', avg: 105, min: 78, max: 140 },
+  { time: '08:00', avg: 145, min: 105, max: 195 },
+  { time: '10:00', avg: 160, min: 115, max: 210 },
+  { time: '12:00', avg: 155, min: 110, max: 205 },
+  { time: '14:00', avg: 138, min: 100, max: 180 },
+  { time: '16:00', avg: 130, min: 92, max: 170 },
+  { time: '18:00', avg: 150, min: 108, max: 198 },
+  { time: '20:00', avg: 142, min: 102, max: 185 },
+  { time: '22:00', avg: 132, min: 95, max: 172 },
 ];
 
 export const FEATURE_USAGE = [
@@ -304,6 +319,31 @@ export const HOSPITAL_PATIENTS_MAP = [
   { name: 'นางแสงเดือน รุ่งเรือง', lat: 17.25, lng: 104.12, status: 'notVisited', disease: 'เบาหวาน' },
   { name: 'นายสุรเดช บุญมี', lat: 17.14, lng: 104.05, status: 'visited', disease: 'ความดันโลหิตสูง' },
 ];
+
+/* ═══ VITAL SIGN ANALYTICS ═══ */
+export const VS_BY_TYPE = [
+  { type: 'ความดันโลหิต', icon: '💓', total: 193, normal: 158, abnormal: 35, color: '#D63031' },
+  { type: 'ชีพจร', icon: '💗', total: 180, normal: 168, abnormal: 12, color: '#6C5CE7' },
+  { type: 'อุณหภูมิ', icon: '🌡️', total: 175, normal: 170, abnormal: 5, color: '#E17055' },
+  { type: 'ออกซิเจน', icon: '🫁', total: 165, normal: 160, abnormal: 5, color: '#0984E3' },
+  { type: 'น้ำตาล', icon: '🩸', total: 120, normal: 102, abnormal: 18, color: '#00B894' },
+];
+
+export const VS_DAILY_TREND = [
+  { date: '17 มี.ค.', total: 32, abnormal: 5 },
+  { date: '18 มี.ค.', total: 45, abnormal: 8 },
+  { date: '19 มี.ค.', total: 38, abnormal: 4 },
+  { date: '20 มี.ค.', total: 52, abnormal: 12 },
+  { date: '21 มี.ค.', total: 28, abnormal: 3 },
+  { date: '22 มี.ค.', total: 48, abnormal: 7 },
+  { date: '23 มี.ค.', total: 41, abnormal: 6 },
+];
+
+export const VS_SEVERITY = {
+  critical: 8,
+  warning: 20,
+  normal: 165,
+};
 
 export const HOSPITAL_ABNORMAL_CASES = [
   { id: 1, name: 'น.ส.ธาตุทอง สีดา', age: 65, condition: 'ความดันโลหิต', value: '150/77', unit: 'mmHg', tag: 'ความดันโลหิตสูง', lat: 17.18, lng: 104.12 },

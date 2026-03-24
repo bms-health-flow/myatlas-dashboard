@@ -3,10 +3,13 @@ import { useOutletContext } from 'react-router-dom';
 import { MapContainer, TileLayer, Popup } from 'react-leaflet';
 import { AbnormalMarker, NormalMarker } from '../components/PulseMarker';
 import {
+  BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+} from 'recharts';
+import {
   HeartPulse, Activity, AlertTriangle, Search,
-  ChevronLeft, ChevronRight, MapPin, Info, ChevronDown,
+  ChevronLeft, ChevronRight, MapPin, Info, ChevronDown, Zap, TrendingUp, Shield,
 } from 'lucide-react';
-import { VITALSIGN_PATIENTS, ABNORMAL_CASES, HOSPITAL_INFO, HOSPITAL_ABNORMAL_CASES } from '../data/mockData';
+import { VITALSIGN_PATIENTS, ABNORMAL_CASES, HOSPITAL_INFO, HOSPITAL_ABNORMAL_CASES, VS_BY_TYPE, VS_DAILY_TREND, VS_SEVERITY } from '../data/mockData';
 
 const CASES_PER_PAGE = 2;
 const PATIENTS_PER_PAGE = 7;
@@ -98,37 +101,20 @@ export default function VitalSign() {
     [patientPage],
   );
 
+  const complianceRate = Math.round((VS_DAILY_TREND.reduce((s, d) => s + d.total, 0) / (268 * 7)) * 100);
+
   const stats = [
-    {
-      label: 'ผู้ป่วยทั้งหมด',
-      value: 268,
-      unit: 'คน',
-      icon: HeartPulse,
-      gradient: 'linear-gradient(135deg, #E17055, #FAB1A0)',
-      shadow: 'rgba(225,112,85,0.35)',
-    },
-    {
-      label: 'การวัดวันนี้',
-      value: 0,
-      unit: 'คน',
-      icon: Activity,
-      gradient: 'linear-gradient(135deg, #0984E3, #74B9FF)',
-      shadow: 'rgba(9,132,227,0.35)',
-    },
-    {
-      label: 'เคสผิดปกติวันนี้',
-      value: 4,
-      unit: 'เคส',
-      icon: AlertTriangle,
-      gradient: 'linear-gradient(135deg, #D63031, #FF7675)',
-      shadow: 'rgba(214,48,49,0.35)',
-    },
+    { label: 'ผู้ป่วยทั้งหมด', value: 268, unit: 'คน', icon: HeartPulse, gradient: 'linear-gradient(135deg, #6C5CE7, #A29BFE)', shadow: 'rgba(108,92,231,0.35)' },
+    { label: 'การวัดวันนี้', value: VS_DAILY_TREND[VS_DAILY_TREND.length - 1].total, unit: 'ครั้ง', icon: Activity, gradient: 'linear-gradient(135deg, #0984E3, #74B9FF)', shadow: 'rgba(9,132,227,0.35)' },
+    { label: 'เคสผิดปกติ', value: abnormalData.length, unit: 'เคส', icon: AlertTriangle, gradient: 'linear-gradient(135deg, #D63031, #FF7675)', shadow: 'rgba(214,48,49,0.35)' },
+    { label: 'วิกฤต', value: VS_SEVERITY.critical, unit: 'เคส', icon: Shield, gradient: 'linear-gradient(135deg, #E17055, #FAB1A0)', shadow: 'rgba(225,112,85,0.35)' },
+    { label: 'อัตราการวัด', value: complianceRate + '%', unit: 'compliance', icon: TrendingUp, gradient: 'linear-gradient(135deg, #00B894, #55EFC4)', shadow: 'rgba(0,184,148,0.3)' },
   ];
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
       {/* ── 1. Stat Cards ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 18 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 16 }}>
         {stats.map((s, i) => (
           <div
             key={s.label}
@@ -155,7 +141,103 @@ export default function VitalSign() {
         ))}
       </div>
 
-      {/* ── 2. Map + Abnormal List ── */}
+      {/* ── 2. VS by Type + Severity ── */}
+      <div style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gap: 22 }}>
+        {/* VS breakdown by type */}
+        <div className="gc anim-up" style={{ animationDelay: '200ms' }}>
+          <div className="gc-body">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 20 }}>
+              <div className="gc-icon" style={{ background: 'rgba(108,92,231,0.08)' }}><Zap size={20} style={{ color: '#6C5CE7' }} /></div>
+              <div className="gc-title"><h3>สรุป Vital Signs แยกประเภท</h3><p>จำนวนการวัดและค่าผิดปกติ</p></div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {VS_BY_TYPE.map(v => {
+                const abnPct = Math.round((v.abnormal / v.total) * 100);
+                return (
+                <div key={v.type} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px', borderRadius: 16, border: '1px solid rgba(0,0,0,0.03)', background: 'rgba(255,255,255,0.5)' }}>
+                  <span style={{ fontSize: 24 }}>{v.icon}</span>
+                  <div style={{ width: 100, flexShrink: 0 }}>
+                    <p style={{ fontSize: 14, fontWeight: 600, color: '#2D3436' }}>{v.type}</p>
+                    <p style={{ fontSize: 11, color: '#B2BEC3' }}>{v.total} ครั้ง</p>
+                  </div>
+                  {/* Bar: normal vs abnormal */}
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', height: 10, borderRadius: 99, overflow: 'hidden', background: 'rgba(0,0,0,0.03)' }}>
+                      <div style={{ width: `${100 - abnPct}%`, background: '#00B894', borderRadius: '99px 0 0 99px', transition: 'width 0.6s ease' }} />
+                      <div style={{ width: `${abnPct}%`, background: v.color, transition: 'width 0.6s ease', borderRadius: '0 99px 99px 0' }} />
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: 12, flexShrink: 0 }}>
+                    <div style={{ textAlign: 'center' }}>
+                      <p style={{ fontSize: 10, color: '#00B894', fontWeight: 600 }}>ปกติ</p>
+                      <p className="num" style={{ fontSize: 16, fontWeight: 800, color: '#00B894' }}>{v.normal}</p>
+                    </div>
+                    <div style={{ textAlign: 'center' }}>
+                      <p style={{ fontSize: 10, color: v.color, fontWeight: 600 }}>ผิดปกติ</p>
+                      <p className="num" style={{ fontSize: 16, fontWeight: 800, color: v.color }}>{v.abnormal}</p>
+                    </div>
+                  </div>
+                </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* Severity + Daily Trend */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
+          {/* Severity breakdown */}
+          <div className="gc anim-up" style={{ animationDelay: '250ms' }}>
+            <div className="gc-body">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 20 }}>
+                <div className="gc-icon" style={{ background: 'rgba(214,48,49,0.08)' }}><Shield size={20} style={{ color: '#D63031' }} /></div>
+                <div className="gc-title"><h3>ระดับความรุนแรง</h3><p>แบ่งตามความเร่งด่วน</p></div>
+              </div>
+              <div style={{ display: 'flex', gap: 12 }}>
+                {[
+                  { label: 'วิกฤต', value: VS_SEVERITY.critical, color: '#D63031', bg: '#FFF0F0', desc: 'ต้องดูแลทันที' },
+                  { label: 'เฝ้าระวัง', value: VS_SEVERITY.warning, color: '#E17055', bg: '#FFF0EB', desc: 'ติดตามใกล้ชิด' },
+                  { label: 'ปกติ', value: VS_SEVERITY.normal, color: '#00B894', bg: '#F0FFF8', desc: 'ค่าอยู่ในเกณฑ์' },
+                ].map(s => (
+                  <div key={s.label} style={{ flex: 1, padding: 16, borderRadius: 18, background: s.bg, textAlign: 'center', border: `1px solid ${s.color}10` }}>
+                    <p className="num" style={{ fontSize: 32, fontWeight: 900, color: s.color }}>{s.value}</p>
+                    <p style={{ fontSize: 13, fontWeight: 700, color: s.color, marginTop: 4 }}>{s.label}</p>
+                    <p style={{ fontSize: 10, color: '#B2BEC3', marginTop: 2 }}>{s.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Daily trend chart */}
+          <div className="gc anim-up" style={{ animationDelay: '300ms', flex: 1 }}>
+            <div className="gc-body" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 16 }}>
+                <div className="gc-icon" style={{ background: 'rgba(9,132,227,0.08)' }}><TrendingUp size={20} style={{ color: '#0984E3' }} /></div>
+                <div className="gc-title"><h3>แนวโน้มการวัด 7 วัน</h3><p>จำนวนการวัดรายวัน</p></div>
+              </div>
+              <div style={{ flex: 1, minHeight: 140 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={VS_DAILY_TREND} margin={{ top: 5, right: 5, bottom: 5, left: -15 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(108,92,231,0.05)" vertical={false} />
+                    <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#B2BEC3' }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fontSize: 10, fill: '#B2BEC3' }} axisLine={false} tickLine={false} />
+                    <Tooltip contentStyle={{ borderRadius: 14, fontSize: 12, border: 'none', boxShadow: '0 8px 24px rgba(0,0,0,0.08)', background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(12px)' }} />
+                    <Bar dataKey="total" name="วัดทั้งหมด" fill="#6C5CE7" radius={[6, 6, 0, 0]} opacity={0.2} />
+                    <Bar dataKey="abnormal" name="ผิดปกติ" fill="#D63031" radius={[6, 6, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: 20, marginTop: 8, fontSize: 11, color: '#636E72' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 10, height: 10, borderRadius: 3, background: '#6C5CE730', display: 'inline-block' }} /> วัดทั้งหมด</span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 10, height: 10, borderRadius: 3, background: '#D63031', display: 'inline-block' }} /> ผิดปกติ</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── 3. Map + Abnormal List ── */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: 22 }}>
         {/* Map card */}
         <div

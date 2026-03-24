@@ -1,8 +1,8 @@
 import { useState, useMemo } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import {
-  LineChart, Line, PieChart, Pie, Cell,
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  LineChart, Line, AreaChart, Area, PieChart, Pie, Cell,
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine,
 } from 'recharts';
 import {
   Users, Home, HeartPulse, AlertTriangle, Building2, TrendingUp,
@@ -13,7 +13,7 @@ import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet';
 import HeatLayer from '../components/HeatLayer';
 import {
   DASHBOARD_STATS, USAGE_CHART_DATA, HOSPITAL_COMPARISON,
-  DISEASE_GROUPS, CRITICAL_CASES, CGM_PATIENTS, FEATURE_USAGE,
+  DISEASE_GROUPS, CRITICAL_CASES, CGM_PATIENTS, CGM_GLUCOSE_TREND, FEATURE_USAGE,
   REGIONS, PROVINCES_DATA,
   HOSPITAL_INFO, HOSPITAL_STATS, HOSPITAL_USAGE_CHART,
   HOSPITAL_DISEASE_GROUPS, HOSPITAL_CRITICAL_CASES, HOSPITAL_PATIENTS_MAP,
@@ -543,45 +543,136 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* ═══ CGM ═══ */}
-      <div className="gc anim-up" style={ad(10)}>
-        <div className="gc-body">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 28 }}>
-            <div className="gc-icon" style={{ background: 'linear-gradient(135deg, #FDCB6E, #E17055)' }}><Zap size={20} style={{ color: 'white' }} /></div>
-            <div className="gc-title"><h3>CGM Patient Monitor</h3><p>Continuous Glucose Monitoring</p></div>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 2fr', gap: 18 }}>
-            <div style={{ background: 'linear-gradient(145deg, #FFF8ED, #FFFBF0)', border: '1.5px solid rgba(251,191,36,0.1)', borderRadius: 22, padding: 28, textAlign: 'center' }}>
-              <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 2, color: 'rgba(217,119,6,0.5)' }}>ผู้ป่วย</p>
-              <p className="num" style={{ fontSize: 52, fontWeight: 900, color: '#D97706', marginTop: 8 }}>{CGM_PATIENTS.length}</p>
-              <p style={{ fontSize: 12, color: '#B2BEC3', marginTop: 10 }}>{totalReadings.toLocaleString()} readings</p>
-            </div>
-            <div style={{ background: 'linear-gradient(145deg, #FFF8ED, #FFFBF0)', border: '1.5px solid rgba(251,191,36,0.1)', borderRadius: 22, padding: 28, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-              <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 2, color: 'rgba(217,119,6,0.5)', marginBottom: 14 }}>เฉลี่ย</p>
-              <div style={{ position: 'relative', width: 110, height: 110 }}>
-                <svg viewBox="0 0 120 120" style={{ width: '100%', height: '100%' }}>
-                  <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(0,0,0,0.04)" strokeWidth="9" />
-                  <circle cx="60" cy="60" r="50" fill="none" stroke={avgGlucose > 140 ? '#FDCB6E' : '#00B894'} strokeWidth="9" strokeLinecap="round" strokeDasharray={`${(avgGlucose / 200) * 314} 314`} transform="rotate(-90 60 60)" style={{ transition: 'all 1s ease', filter: `drop-shadow(0 2px 6px ${avgGlucose > 140 ? 'rgba(253,203,110,0.4)' : 'rgba(0,184,148,0.4)'})` }} />
+      {/* ═══ CGM PATIENT MONITOR ═══ */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 22 }}>
+        {/* LEFT: Gauge card */}
+        <div className="gc anim-up" style={ad(10)}>
+          <div className="gc-body" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '40px 32px 32px' }}>
+            <p style={{ fontSize: 13, fontWeight: 600, color: '#B2BEC3', letterSpacing: 0.3 }}>Statistics</p>
+            <p style={{ fontSize: 20, fontWeight: 800, color: '#2D3436', marginTop: 6, marginBottom: 32 }}>ค่าน้ำตาลเฉลี่ย CGM</p>
+
+            {/* ── Semicircle gauge ── */}
+            {(() => {
+              const pct = Math.max(0, Math.min(1, (avgGlucose - 40) / (220 - 40)));
+              const angle = 180 - pct * 180;
+              const rad = (angle * Math.PI) / 180;
+              const cx = 120, cy = 115, R = 90;
+              const nx = cx + R * Math.cos(rad);
+              const ny = cy - R * Math.sin(rad);
+              const valColor = avgGlucose < 70 ? '#D63031' : avgGlucose > 180 ? '#E17055' : '#00B894';
+              return (
+              <div style={{ position: 'relative', width: 280, height: 170, marginBottom: 8 }}>
+                <svg viewBox="0 0 240 135" style={{ width: '100%', height: '100%', overflow: 'visible' }}>
+                  <defs>
+                    <linearGradient id="gArc" x1="0%" y1="50%" x2="100%" y2="50%">
+                      <stop offset="0%" stopColor="#E17055" />
+                      <stop offset="20%" stopColor="#FDCB6E" />
+                      <stop offset="35%" stopColor="#00B894" />
+                      <stop offset="65%" stopColor="#00B894" />
+                      <stop offset="80%" stopColor="#FDCB6E" />
+                      <stop offset="100%" stopColor="#D63031" />
+                    </linearGradient>
+                    <filter id="dotGlow">
+                      <feGaussianBlur stdDeviation="4" result="blur" />
+                      <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+                    </filter>
+                    <filter id="arcShadow">
+                      <feDropShadow dx="0" dy="2" stdDeviation="3" floodOpacity="0.08" />
+                    </filter>
+                  </defs>
+
+                  {/* Background arc */}
+                  <path d={`M ${cx - R} ${cy} A ${R} ${R} 0 0 1 ${cx + R} ${cy}`} fill="none" stroke="#F0EFF5" strokeWidth="22" strokeLinecap="round" />
+
+                  {/* Colored gradient arc */}
+                  <path d={`M ${cx - R} ${cy} A ${R} ${R} 0 0 1 ${cx + R} ${cy}`} fill="none" stroke="url(#gArc)" strokeWidth="22" strokeLinecap="round" filter="url(#arcShadow)" />
+
+                  {/* Tick marks */}
+                  {[0, 0.167, 0.5, 0.778, 1].map((t, i) => {
+                    const a = (180 - t * 180) * Math.PI / 180;
+                    const x1 = cx + (R - 14) * Math.cos(a), y1 = cy - (R - 14) * Math.sin(a);
+                    const x2 = cx + (R + 14) * Math.cos(a), y2 = cy - (R + 14) * Math.sin(a);
+                    return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="white" strokeWidth="2.5" strokeLinecap="round" />;
+                  })}
+
+                  {/* Indicator dot */}
+                  <circle cx={nx} cy={ny} r="10" fill={valColor} stroke="white" strokeWidth="4" filter="url(#dotGlow)" />
+
+                  {/* Scale labels */}
+                  {[
+                    { t: 0, label: '40', color: '#E17055' },
+                    { t: 0.167, label: '70', color: '#FDCB6E' },
+                    { t: 0.5, label: '130', color: '#00B894' },
+                    { t: 0.778, label: '180', color: '#FDCB6E' },
+                    { t: 1, label: '220', color: '#D63031' },
+                  ].map(({ t, label, color }) => {
+                    const a = (180 - t * 180) * Math.PI / 180;
+                    const lx = cx + (R + 24) * Math.cos(a);
+                    const ly = cy - (R + 24) * Math.sin(a);
+                    return <text key={label} x={lx} y={ly + 3} fontSize="9" fontWeight="600" fill={color} textAnchor="middle" fontFamily="Inter,sans-serif">{label}</text>;
+                  })}
                 </svg>
-                <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                  <span className="num" style={{ fontSize: 26, fontWeight: 900, color: '#2D3436' }}>{avgGlucose}</span>
-                  <span style={{ fontSize: 10, color: '#B2BEC3' }}>mg/dL</span>
+
+                {/* Center value */}
+                <div style={{ position: 'absolute', bottom: 8, left: '50%', transform: 'translateX(-50%)', textAlign: 'center' }}>
+                  <p className="num" style={{ fontSize: 56, fontWeight: 900, color: valColor, lineHeight: 1, letterSpacing: -2 }}>{avgGlucose}</p>
+                  <p style={{ fontSize: 13, color: '#B2BEC3', marginTop: 6, fontWeight: 500 }}>ค่าเฉลี่ยน้ำตาล mg/dL</p>
                 </div>
               </div>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {CGM_PATIENTS.map(p => (
-                <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 16px', borderRadius: 16, border: '1px solid rgba(0,0,0,0.03)', background: 'rgba(255,255,255,0.5)', cursor: 'pointer', transition: 'all 0.2s ease' }}>
-                  <div style={{ width: 42, height: 42, borderRadius: '50%', background: p.color, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 14, fontWeight: 700, boxShadow: `0 4px 12px ${p.color}40` }}>{p.initial}</div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <p className="truncate" style={{ fontSize: 14, fontWeight: 600, color: '#2D3436' }}>{p.name}</p>
-                    <p style={{ fontSize: 11, color: '#B2BEC3' }}>{p.readings.toLocaleString()} readings</p>
-                  </div>
-                  <span className="num" style={{ fontSize: 14, fontWeight: 700, color: '#2D3436', flexShrink: 0 }}>{p.avg} <span style={{ fontSize: 10, fontWeight: 400, color: '#B2BEC3' }}>mg/dL</span></span>
-                  <span style={{ width: 10, height: 10, borderRadius: '50%', background: p.status === 'warning' ? '#FDCB6E' : '#00B894', boxShadow: `0 0 0 3px white, 0 0 8px ${p.status === 'warning' ? 'rgba(253,203,110,0.4)' : 'rgba(0,184,148,0.4)'}`, flexShrink: 0 }} />
+              );
+            })()}
+
+            {/* ── Separator ── */}
+            <div style={{ width: 60, height: 2, borderRadius: 1, background: 'linear-gradient(90deg, transparent, #E8E5FF, transparent)', margin: '16px 0' }} />
+
+            {/* ── Summary stats ── */}
+            <div style={{ display: 'flex', gap: 32, width: '100%', justifyContent: 'center' }}>
+              {[
+                { label: 'ผู้ป่วย', value: CGM_PATIENTS.length, unit: 'คน', color: '#D97706', icon: '👥' },
+                { label: 'Readings', value: totalReadings.toLocaleString(), unit: 'รายการ', color: '#6C5CE7', icon: '📊' },
+                { label: 'Time in Range', value: Math.round(CGM_PATIENTS.reduce((s, p) => s + p.tirInRange, 0) / CGM_PATIENTS.length) + '%', unit: 'เฉลี่ย', color: '#00B894', icon: '🎯' },
+              ].map(s => (
+                <div key={s.label} style={{ textAlign: 'center' }}>
+                  <p style={{ fontSize: 18, marginBottom: 4 }}>{s.icon}</p>
+                  <p className="num" style={{ fontSize: 22, fontWeight: 900, color: s.color }}>{s.value}</p>
+                  <p style={{ fontSize: 10, color: '#B2BEC3', fontWeight: 500, marginTop: 2 }}>{s.label}</p>
                 </div>
               ))}
             </div>
+          </div>
+        </div>
+
+        {/* RIGHT: Patient list */}
+        <div className="gc anim-up" style={ad(11)}>
+          <div className="gc-head">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+              <div className="gc-icon" style={{ background: 'linear-gradient(135deg, #FDCB6E, #E17055)' }}><Zap size={20} style={{ color: 'white' }} /></div>
+              <div className="gc-title"><h3>รายชื่อผู้ป่วย CGM</h3><p>{CGM_PATIENTS.length} คน</p></div>
+            </div>
+          </div>
+          <div style={{ padding: '16px 24px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {CGM_PATIENTS.map(p => {
+              const avgColor = p.avg < 70 ? '#D63031' : p.avg > 180 ? '#E17055' : '#00B894';
+              const tirColor = p.tirInRange >= 70 ? '#00B894' : p.tirInRange >= 50 ? '#E17055' : '#D63031';
+              return (
+              <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px', borderRadius: 18, border: '1px solid rgba(0,0,0,0.03)', background: 'rgba(255,255,255,0.5)', cursor: 'pointer', transition: 'all 0.2s ease' }}>
+                <div style={{ width: 42, height: 42, borderRadius: '50%', background: p.color, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 14, fontWeight: 700, boxShadow: `0 4px 12px ${p.color}35`, flexShrink: 0 }}>{p.initial}</div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p className="truncate" style={{ fontSize: 14, fontWeight: 600, color: '#2D3436' }}>{p.name}</p>
+                  <p style={{ fontSize: 11, color: '#B2BEC3' }}>{p.readings.toLocaleString()} readings</p>
+                </div>
+                <div style={{ textAlign: 'center', padding: '4px 12px', borderRadius: 12, background: `${avgColor}08` }}>
+                  <p style={{ fontSize: 10, color: '#B2BEC3' }}>Glucose</p>
+                  <p className="num" style={{ fontSize: 18, fontWeight: 800, color: avgColor }}>{p.avg}</p>
+                </div>
+                <div style={{ textAlign: 'center', padding: '4px 12px', borderRadius: 12, background: `${tirColor}08` }}>
+                  <p style={{ fontSize: 10, color: '#B2BEC3' }}>TIR</p>
+                  <p className="num" style={{ fontSize: 18, fontWeight: 800, color: tirColor }}>{p.tirInRange}%</p>
+                </div>
+                <span style={{ width: 10, height: 10, borderRadius: '50%', background: tirColor, boxShadow: `0 0 0 3px white, 0 0 8px ${tirColor}40`, flexShrink: 0 }} />
+              </div>
+              );
+            })}
           </div>
         </div>
       </div>
