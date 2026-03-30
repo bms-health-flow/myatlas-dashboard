@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import MainLayout from './layouts/MainLayout'
 import Dashboard from './pages/Dashboard'
 import VitalSign from './pages/VitalSign'
@@ -22,7 +22,7 @@ function App() {
   }
 
   return (
-    <BrowserRouter>
+    <Router>
       <Routes>
         <Route path="/login" element={
           loggedIn ? <Navigate to="/dashboard" replace /> : <Login onLogin={handleLogin} />
@@ -37,7 +37,7 @@ function App() {
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>
-    </BrowserRouter>
+    </Router>
   )
 }
 
