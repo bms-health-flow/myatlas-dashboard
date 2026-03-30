@@ -6,7 +6,7 @@ import {
 } from 'recharts';
 import {
   Users, Home, HeartPulse, AlertTriangle, Building2, TrendingUp,
-  Activity, ChevronRight, Bell, Zap, Eye, BarChart3, Stethoscope, ArrowRight,
+  Activity, ChevronRight, Bell, Zap, Eye, BarChart3, Stethoscope,
   MapPin, Map, Flame, Trophy, Filter, Hospital,
 } from 'lucide-react';
 import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet';
@@ -34,11 +34,11 @@ const Tip = ({ active, payload, label }) => {
 };
 
 const stats = [
-  { icon: Users, label: 'จำนวนผู้ป่วย', value: DASHBOARD_STATS.totalPatients, growth: DASHBOARD_STATS.growthPatients, bg: 'linear-gradient(135deg, #6C5CE7, #A29BFE)' },
-  { icon: Home, label: 'เคสส่งเยี่ยม', value: DASHBOARD_STATS.totalVisits, growth: DASHBOARD_STATS.growthVisits, bg: 'linear-gradient(135deg, #00B894, #55EFC4)' },
-  { icon: HeartPulse, label: 'Vital Signs', value: DASHBOARD_STATS.totalVitalSigns, growth: DASHBOARD_STATS.growthVitalSigns, bg: 'linear-gradient(135deg, #E17055, #FAB1A0)' },
-  { icon: AlertTriangle, label: 'VS ผิดปกติ', value: DASHBOARD_STATS.abnormalVitalSigns, growth: DASHBOARD_STATS.growthAbnormal, bg: 'linear-gradient(135deg, #D63031, #FF7675)' },
-  { icon: Building2, label: 'รพ. ใช้งาน', value: `${DASHBOARD_STATS.hospitalsActive}/${DASHBOARD_STATS.totalHospitals}`, bg: 'linear-gradient(135deg, #0984E3, #74B9FF)' },
+  { icon: Users, label: 'จำนวนผู้ป่วย', value: DASHBOARD_STATS.totalPatients, growth: DASHBOARD_STATS.growthPatients, bg: 'linear-gradient(135deg, #00B894, #55EFC4)', iconBg: 'rgba(0,184,148,0.15)', iconColor: '#00B894' },
+  { icon: Home, label: 'เคสส่งเยี่ยม', value: DASHBOARD_STATS.totalVisits, growth: DASHBOARD_STATS.growthVisits, bg: 'linear-gradient(135deg, #00B894, #55EFC4)', iconBg: 'rgba(0,184,148,0.15)', iconColor: '#00B894' },
+  { icon: HeartPulse, label: 'Vital Signs', value: DASHBOARD_STATS.totalVitalSigns, growth: DASHBOARD_STATS.growthVitalSigns, bg: 'linear-gradient(135deg, #00B894, #55EFC4)', iconBg: 'rgba(0,184,148,0.15)', iconColor: '#00B894' },
+  { icon: AlertTriangle, label: 'VS ผิดปกติ', value: DASHBOARD_STATS.abnormalVitalSigns, growth: DASHBOARD_STATS.growthAbnormal, bg: 'linear-gradient(135deg, #E17055, #FAB1A0)', iconBg: 'rgba(225,112,85,0.15)', iconColor: '#E17055' },
+  { icon: Building2, label: 'รพ. ใช้งาน', value: `${DASHBOARD_STATS.hospitalsActive}/${DASHBOARD_STATS.totalHospitals}`, growth: 9.2, bg: 'linear-gradient(135deg, #00B894, #55EFC4)', iconBg: 'rgba(0,184,148,0.15)', iconColor: '#00B894' },
 ];
 
 /* ═══ THAILAND MAP SECTION ═══ */
@@ -307,56 +307,81 @@ export default function Dashboard() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
 
       {/* ═══ HERO ═══ */}
-      <div className="hero anim-up" style={ad(0)}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div className="anim-up" style={{ ...ad(0), borderRadius: 'var(--r-l)', padding: '24px 28px', position: 'relative', overflow: 'hidden', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>
+        {/* Background grid pattern */}
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px)', backgroundSize: '32px 32px', pointerEvents: 'none' }} />
+        {/* Decorative circles */}
+        <div style={{ position: 'absolute', top: -60, right: -40, width: 200, height: 200, borderRadius: '50%', background: 'rgba(255,255,255,0.06)' }} />
+        <div style={{ position: 'absolute', bottom: -80, right: 100, width: 250, height: 250, borderRadius: '50%', background: 'rgba(255,255,255,0.04)' }} />
+
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative', zIndex: 1 }}>
           <div>
             {isHospital ? (
               <>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', borderRadius: 99, background: 'rgba(108,92,231,0.08)', fontSize: 12, fontWeight: 600, color: '#6C5CE7' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 12px', borderRadius: 99, background: 'rgba(255,255,255,0.15)', fontSize: 12, fontWeight: 600 }}>
                     <Hospital size={14} /> {HOSPITAL_INFO.name}
                   </div>
-                  <span className="badge b-purple" style={{ fontSize: 10 }}>จ.{HOSPITAL_INFO.province}</span>
+                  <span style={{ fontSize: 11, padding: '4px 10px', borderRadius: 99, background: 'rgba(255,255,255,0.1)' }}>จ.{HOSPITAL_INFO.province}</span>
                 </div>
-                <h2>Dashboard <span>{HOSPITAL_INFO.name}</span></h2>
-                <p className="sub" style={{ marginTop: 12 }}>ข้อมูลผู้ป่วยและการให้บริการ ระดับจังหวัด{HOSPITAL_INFO.province}</p>
+                <p style={{ fontSize: 14, opacity: 0.8 }}>ยินดีต้อนรับสู่</p>
+                <h2 style={{ fontSize: 28, fontWeight: 900, lineHeight: 1.2, marginTop: 4, color: 'white', WebkitTextFillColor: 'white', backgroundImage: 'none' }}>Atlas Dashboard</h2>
+                <p style={{ fontSize: 13, opacity: 0.7, marginTop: 6 }}>ข้อมูลผู้ป่วยและการให้บริการ ระดับจังหวัด{HOSPITAL_INFO.province}</p>
               </>
             ) : (
               <>
-                <h2>ยินดีต้อนรับสู่ <span>Atlas</span><br/>Healthcare Dashboard</h2>
-                <p className="sub" style={{ marginTop: 12 }}>ระบบติดตามและ Monitor ข้อมูลผู้ป่วยแบบ Real-time<br/>สำหรับบุคลากรทางการแพทย์ ครบทุกมิติ</p>
-                <button className="btn btn-primary" style={{ marginTop: 24 }}>เริ่มต้นใช้งาน <ArrowRight size={16} /></button>
+                <p style={{ fontSize: 14, opacity: 0.8 }}>ยินดีต้อนรับสู่</p>
+                <h2 style={{ fontSize: 32, fontWeight: 900, lineHeight: 1.2, marginTop: 4, color: 'white', WebkitTextFillColor: 'white', backgroundImage: 'none' }}>
+                  Atlas <span style={{ color: '#55EFC4' }}>Dashboard</span>
+                </h2>
+                <p style={{ fontSize: 13, opacity: 0.7, marginTop: 8, maxWidth: 360 }}>ระบบติดตามและ Monitor ข้อมูลผู้ป่วยแบบ Real-time</p>
               </>
             )}
           </div>
-          <div style={{ position: 'relative', width: 220, height: 160 }}>
-            {[
-              { t: 0, l: 10, w: 65, h: 65, r: 16, bg: 'linear-gradient(135deg, #6C5CE7, #A29BFE)', d: '0s' },
-              { t: 20, l: 90, w: 55, h: 55, r: 14, bg: 'linear-gradient(135deg, #74B9FF, #0984E3)', d: '0.6s' },
-              { t: 80, l: 20, w: 50, h: 50, r: 14, bg: 'linear-gradient(135deg, #FDCB6E, #F39C12)', d: '1.2s' },
-              { t: 5, l: 160, w: 40, h: 40, r: 12, bg: 'linear-gradient(135deg, #55EFC4, #00B894)', d: '1.8s' },
-              { t: 90, l: 140, w: 45, h: 45, r: 50, bg: 'linear-gradient(135deg, #FF7675, #E17055)', d: '2.4s' },
-              { t: 50, l: 60, w: 30, h: 30, r: 8, bg: 'linear-gradient(135deg, #E84393, #FD79A8)', d: '0.3s' },
-            ].map(({ t, l, w, h, r, bg, d: dl }, i) => (
-              <div key={i} className="anim-float" style={{ position: 'absolute', top: t, left: l, width: w, height: h, borderRadius: r, background: bg, boxShadow: `0 8px 28px rgba(0,0,0,0.1)`, animationDelay: dl, animationDuration: `${3.5 + i * 0.3}s` }} />
-            ))}
+
+          {/* Right side: illustration placeholder */}
+          <div style={{ position: 'relative', width: 200, height: 120, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {/* 3D-ish illustration blocks */}
+            <div className="anim-float" style={{ position: 'absolute', width: 70, height: 70, borderRadius: 16, background: 'linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.08))', backdropFilter: 'blur(10px)', top: 5, left: 10, animationDuration: '4s' }} />
+            <div className="anim-float" style={{ position: 'absolute', width: 55, height: 55, borderRadius: 14, background: 'linear-gradient(135deg, rgba(85,239,196,0.3), rgba(0,184,148,0.15))', top: 30, left: 80, animationDelay: '1s', animationDuration: '3.5s' }} />
+            <div className="anim-float" style={{ position: 'absolute', width: 45, height: 45, borderRadius: '50%', background: 'linear-gradient(135deg, rgba(253,203,110,0.3), rgba(243,156,18,0.15))', top: 0, left: 140, animationDelay: '0.5s', animationDuration: '4.5s' }} />
+            <div className="anim-float" style={{ position: 'absolute', width: 35, height: 35, borderRadius: 10, background: 'linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05))', top: 65, left: 140, animationDelay: '1.5s', animationDuration: '3s' }} />
           </div>
         </div>
       </div>
 
-      {/* ═══ STAT CARDS ═══ */}
-      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${currentStats.length}, 1fr)`, gap: 18 }}>
+      {/* ═══ STAT CARDS (Figma style: white card, icon circle, trend badge) ═══ */}
+      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${currentStats.length}, 1fr)`, gap: 16 }}>
         {currentStats.map((s, i) => (
-          <div key={s.label} className="sc anim-up" style={{ ...ad(i + 1), background: s.bg }}>
-            <div className="shimmer" />
-            <div className="sc-in">
-              <div className="sc-top">
-                <div className="ic"><s.icon size={22} /></div>
-                {s.growth && <div className="tr"><TrendingUp size={11} />+{s.growth}%</div>}
+          <div key={s.label} className="gc anim-up" style={{ ...ad(i + 1), padding: '20px 16px', overflow: 'hidden', position: 'relative' }}>
+            {/* Top row: icon + trend */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+              <div style={{
+                width: 40, height: 40, borderRadius: '50%',
+                background: s.bg,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: `0 4px 12px rgba(0,0,0,0.1)`,
+              }}>
+                <s.icon size={18} style={{ color: 'white' }} />
               </div>
-              <div className="val">{typeof s.value === 'number' ? s.value.toLocaleString() : s.value}</div>
-              <div className="lbl">{s.label}</div>
+              {s.growth && (
+                <div style={{
+                  display: 'flex', alignItems: 'center', gap: 3,
+                  padding: '4px 10px', borderRadius: 99,
+                  background: s.iconBg || 'rgba(0,184,148,0.1)',
+                  fontSize: 11, fontWeight: 700, fontFamily: 'Inter, sans-serif',
+                  color: s.iconColor || '#00B894',
+                }}>
+                  <TrendingUp size={11} /> +{s.growth}%
+                </div>
+              )}
             </div>
+            {/* Label */}
+            <p style={{ fontSize: 12, fontWeight: 500, color: '#636E72', marginBottom: 4 }}>{s.label}</p>
+            {/* Value */}
+            <p className="num" style={{ fontSize: 28, fontWeight: 900, color: '#2D3436', lineHeight: 1 }}>
+              {typeof s.value === 'number' ? s.value.toLocaleString() : s.value}
+            </p>
           </div>
         ))}
       </div>

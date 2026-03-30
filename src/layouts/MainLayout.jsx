@@ -100,73 +100,119 @@ export default function MainLayout({ initialRole = "admin", onLogout }) {
 
   return (
     <div className="app">
-      {/* ─── Sidebar ─── */}
-      <aside className="sidebar">
-        <div className="sidebar-inner">
+      {/* ─── Sidebar (Figma: dark purple gradient) ─── */}
+      <aside style={{
+        width: 200, flexShrink: 0, padding: 16, zIndex: 30,
+      }}>
+        <div style={{
+          display: 'flex', flexDirection: 'column', height: '100%',
+          background: 'linear-gradient(180deg, #4438AD 0%, #1C1747 100%)',
+          borderRadius: 24,
+          padding: '0',
+          overflow: 'hidden',
+          boxShadow: '0 4px 4px rgba(0,0,0,0.1)',
+          position: 'relative',
+        }}>
+          {/* Overlay blur tint */}
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(68,56,173,0.5), rgba(28,23,71,0.5))', backdropFilter: 'blur(40px)', borderRadius: 24, pointerEvents: 'none' }} />
+
           {/* Logo */}
-          <div className="s-logo">
-            <div className="s-logo-icon">A</div>
-            <span className="s-logo-text">
-              Atlas
-              <span>Healthcare</span>
-            </span>
+          <div style={{ display: 'flex', gap: 16, padding: 16, position: 'relative', zIndex: 1 }}>
+            <div style={{
+              width: 48, height: 48, borderRadius: 16, background: 'white',
+              boxShadow: '0 0 24px 4px rgba(143,134,251,0.35)',
+              flexShrink: 0,
+            }} />
+            <div style={{ color: 'white' }}>
+              <p style={{ fontSize: 20, fontWeight: 800, fontFamily: 'Inter, sans-serif', lineHeight: 1.2 }}>ATLAS</p>
+              <p style={{ fontSize: 14, fontWeight: 400, fontFamily: 'Inter, sans-serif', letterSpacing: 2.24, opacity: 0.8 }}>Dashboad</p>
+            </div>
           </div>
 
-          {/* Role Switcher */}
-          <div className="s-role">
-            <button
-              className={`s-role-btn ${role === "admin" ? "active" : ""}`}
-              onClick={() => setRole("admin")}
-            >
-              <Shield size={13} /> Admin
-            </button>
-            <button
-              className={`s-role-btn ${role === "hospital" ? "active" : ""}`}
-              onClick={() => setRole("hospital")}
-            >
-              <Building2 size={13} /> Hospital
-            </button>
-          </div>
-
-          <div className="s-divider" />
+          {/* Divider */}
+          <div style={{ height: 1, background: 'rgba(255,255,255,0.1)', margin: '0 16px', position: 'relative', zIndex: 1 }} />
 
           {/* Nav */}
-          <div className="s-section">Menu</div>
-          <nav className="s-nav">
-            {navItems.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                end
-                className={({ isActive }) => `s-link ${isActive ? "active" : ""}`}
-              >
-                <item.icon />
-                <span>{item.label}</span>
-                <span className="s-arrow"><ChevronRight size={14} /></span>
-              </NavLink>
-            ))}
-          </nav>
+          <div style={{ flex: 1, padding: '8px 16px', display: 'flex', flexDirection: 'column', gap: 8, position: 'relative', zIndex: 1 }}>
+            <p style={{ fontSize: 10, color: 'white', opacity: 0.5, marginTop: 8, marginBottom: 4 }}>Menu</p>
 
-          {/* Promo */}
-          <div className="s-bottom">
-            <div className="s-promo">
-              <p>ระบบติดตามสุขภาพ อัจฉริยะ ด้วย AI</p>
-              <a href="#">
-                <Sparkles size={14} /> อัปเกรด Pro <ArrowRight size={14} />
-              </a>
-            </div>
+            <nav style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              {navItems.map((item) => (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  end
+                  style={({ isActive }) => ({
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    padding: '8px 8px',
+                    borderRadius: isActive ? 100 : 8,
+                    background: isActive ? 'white' : 'transparent',
+                    color: isActive ? '#4438AD' : 'white',
+                    fontSize: 14,
+                    textDecoration: 'none',
+                    transition: 'all 0.2s ease',
+                    border: isActive ? '1px solid rgba(255,255,255,0.6)' : '1px solid transparent',
+                    boxShadow: isActive ? '0 4px 4px rgba(0,0,0,0.1)' : 'none',
+                  })}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    {({ isActive }) => null}
+                    <div style={{ width: 24, height: 24, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12 }}>
+                      <item.icon size={14} />
+                    </div>
+                    <span>{item.label}</span>
+                  </div>
+                  {location.pathname === item.to && (
+                    <div style={{ width: 16, height: 16, borderRadius: 8, background: '#F2F2F7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <ChevronRight size={10} />
+                    </div>
+                  )}
+                </NavLink>
+              ))}
+            </nav>
           </div>
 
-          {/* User */}
-          <div className="s-user">
-            <div className="s-user-avatar">ส</div>
-            <div className="s-user-info">
-              <div className="name">สมชาย ใจดี</div>
-              <div className="role">{role === "admin" ? "ผู้ดูแลระบบ" : "เจ้าหน้าที่ รพ."}</div>
+          {/* User section */}
+          <div style={{ padding: 12, position: 'relative', zIndex: 1 }}>
+            <div style={{
+              display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between',
+              padding: 16, borderRadius: 16,
+              background: 'rgba(255,255,255,0.1)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              backdropFilter: 'blur(10px)',
+              boxShadow: '0 4px 4px rgba(0,0,0,0.1)',
+              position: 'relative',
+              overflow: 'hidden',
+            }}>
+              {/* Decorative circles */}
+              <div style={{ position: 'absolute', top: -21, left: -21, width: 74, height: 74, borderRadius: '50%', background: 'radial-gradient(circle, rgba(143,134,251,0.3), transparent)', pointerEvents: 'none' }} />
+              <div style={{ position: 'absolute', top: 55, left: 69, width: 74, height: 74, borderRadius: '50%', background: 'radial-gradient(circle, rgba(143,134,251,0.2), transparent)', pointerEvents: 'none' }} />
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, position: 'relative', zIndex: 1 }}>
+                <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'linear-gradient(135deg, #0984E3, #6C5CE7)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 14, fontWeight: 700, position: 'relative' }}>
+                  ส
+                  <div style={{ position: 'absolute', bottom: 2, right: 2, width: 7, height: 7, borderRadius: '50%', background: '#34C759' }} />
+                </div>
+                <div>
+                  <p style={{ fontSize: 12, fontWeight: 500, color: 'white' }}>สมชาย ใจดี</p>
+                  <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.8)' }}>{role === "admin" ? "ผู้ดูแลระบบ" : "เจ้าหน้าที่ รพ."}</p>
+                </div>
+              </div>
+
+              <button
+                onClick={onLogout}
+                title="ออกจากระบบ"
+                style={{
+                  width: 24, height: 24, borderRadius: 8,
+                  background: 'rgba(255,255,255,0.1)',
+                  border: 'none', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: 'white', position: 'relative', zIndex: 1,
+                }}
+              >
+                <LogOut size={12} />
+              </button>
             </div>
-            <button className="s-logout" title="ออกจากระบบ" onClick={onLogout}>
-              <LogOut size={15} />
-            </button>
           </div>
         </div>
       </aside>

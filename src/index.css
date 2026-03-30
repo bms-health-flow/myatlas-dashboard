@@ -101,12 +101,7 @@ body::after {
    ════════════════════════════════════════════════════════════════ */
 .app { display: flex; height: 100vh; overflow: hidden; position: relative; z-index: 1; }
 
-/* ── SIDEBAR: Dark Premium ── */
-.sidebar {
-  width: 270px; display: flex; flex-direction: column;
-  padding: 14px 6px 14px 14px;
-  flex-shrink: 0; z-index: 30;
-}
+/* ── SIDEBAR (now inline styled from Figma) ── */
 
 .sidebar-inner {
   flex: 1; display: flex; flex-direction: column;
